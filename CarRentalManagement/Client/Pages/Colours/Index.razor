@@ -1,9 +1,19 @@
 ﻿@page "/colours/"
+@using CarRentalManagement.Client.Services
 @inject HttpClient _client
 @inject IJSRuntime js
 @attribute [Authorize]
+@inject HttpInterceptorService _interceptor
+@implements IDisposable
 
 <h3>Car Colours</h3>
+<br />
+<a href="/colours/create" class="btn btn-secondary">
+    <span class="oi oi-plus"></span>
+    Create New Colour
+</a>
+<br />
+<br />
 
 @if (Colours == null)
 {
@@ -49,6 +59,7 @@ else
 
     protected async override Task OnInitializedAsync()
     {
+        _interceptor.MonitorEvent();
         Colours = await _client.GetFromJsonAsync<List<Colour>>($"{Endpoints.ColoursEndpoint}");
     }
 
@@ -62,6 +73,11 @@ else
             await OnInitializedAsync();
 
         }
+    }
+
+    public void Dispose()
+    {
+        _interceptor.DisposeEvent();
     }
 
 }

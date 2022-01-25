@@ -2,8 +2,16 @@
 @inject HttpClient _client
 @inject IJSRuntime js
 @attribute [Authorize]
+@implements IDisposable
 
 <h3>Car Bookings</h3>
+<br />
+<a href="/bookings/create" class="btn btn-secondary">
+    <span class="oi oi-plus"></span>
+    Create New Bookings
+</a>
+<br />
+<br />
 
 @if (Bookings == null)
 {
@@ -13,7 +21,7 @@
 }
 else
 {
-    <table class="table table-responsive">
+    <table class="table table-responsive" id="bookingsTable">
         <thead>
             <tr>
                 <th>Booking Id</th>
@@ -29,6 +37,10 @@ else
             {
                 <tr>
                     <td>@booking.Id</td>
+                    <td>@booking.Customer.DrivingLicense</td>
+                    <td>@booking.DateCreated.Date.ToString("dd MMMM yyyy")</td>
+                    <td>@(booking.DateIn != null ? (booking.DateIn.Value -booking.DateOut).TotalDays.ToString() : "To Be Determined")</td>
+                    <td>@booking.Vehicle.LicensePlateNumber</td>
                     <td>
                         <a href="/bookings/view/@booking.Id" class="btn btn-primary">
                             <span class="oi oi-book"></span>
@@ -50,6 +62,7 @@ else
 
 @code {
     private List<Booking> Bookings;
+    private DateTime nullDT = new DateTime(1, 1, 1, 0, 0, 0);
 
     protected async override Task OnInitializedAsync()
     {
@@ -59,13 +72,24 @@ else
     async Task Delete(int bookingId)
     {
         var booking = Bookings.First(q => q.Id == bookingId);
-        var confirm = await js.InvokeAsync<bool>("confirm", $"Do you wan to delete {booking.Id}?");
+        var confirm = await js.InvokeAsync<bool>("confirm", $"Do you want to delete {booking.Id}?");
         if (confirm)
         {
             await _client.DeleteAsync($"{Endpoints.BookingsEndpoint}/{bookingId}");
             await OnInitializedAsync();
 
         }
+    }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        await js.InvokeVoidAsync("AddDataTable", "#bookingsTable");
+
+    }
+
+    public void Dispose()
+    {
+        js.InvokeVoidAsync("DataTablesDispose", "#bookingsTable");
     }
 
 }

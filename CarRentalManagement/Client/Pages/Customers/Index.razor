@@ -4,6 +4,13 @@
 @attribute [Authorize]
 
 <h3>Car Customers</h3>
+<br />
+<a href="/customers/create" class="btn btn-secondary">
+    <span class="oi oi-plus"></span>
+    Create New Customer
+</a>
+<br />
+<br />
 
 @if (Customers == null)
 {
@@ -27,6 +34,8 @@ else
             {
                 <tr>
                     <td>@customer.DrivingLicense</td>
+                    <td>@customer.ContactNumber</td>
+                    <td>@customer.EmailAddress</td>
                     <td>
                         <a href="/customers/view/@customer.Id" class="btn btn-primary">
                             <span class="oi oi-book"></span>
